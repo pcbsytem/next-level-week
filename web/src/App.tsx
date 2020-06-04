@@ -1,10 +1,11 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
+
+import Routes from './routes';
 
 function App() {
   return (
-    <h1>Hello word!</h1>
+    <Routes />
   );
 }
 
