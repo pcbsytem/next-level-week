@@ -3,6 +3,7 @@ import { Link, useHistory } from 'react-router-dom';
 import { FiArrowLeft } from 'react-icons/fi';
 import { Map, TileLayer, Marker } from 'react-leaflet';
 import axios from 'axios';
+import swal from 'sweetalert';
 import { LeafletMouseEvent } from 'leaflet';
 import api from '../../service/api';
 
@@ -127,6 +128,13 @@ const CreatePoint = () => {
     const [latitude, longitude] = selectedPosition;
     const items = selectedItems;
 
+    if (!name || !email || !whatsapp || !uf || !city || !latitude || !longitude || !items) {
+      return swal("Ooops!",
+        "Preencha os campos [Imagem do estabelecimento, Nome da entidade, Email, Whatsapp, Estado (UF), Cidade]",
+        "error"
+      );
+    }
+
     const data = new FormData();
     data.append('name', name);
     data.append('email', email);
@@ -141,9 +149,9 @@ const CreatePoint = () => {
       data.append('image', selectedFile);
     }
 
-    await api.post('points', data);
-
-    alert('Ponto de coleta criado!');
+    await api.post('points', data)
+      .then(response => swal("Cadastro com sucesso!", "Ponto de coleta criado!", "success"))
+      .catch(error => swal("Ooops!", "Verifique sua conexão", "error"));
 
     history.push('/');
   }
@@ -176,6 +184,7 @@ const CreatePoint = () => {
               type="text"
               name="name"
               id="name"
+              maxLength={100}
               onChange={handleInputChange}
             />
           </div>
@@ -184,7 +193,7 @@ const CreatePoint = () => {
             <div className="field">
               <label htmlFor="email">E-mail</label>
               <input
-                type="text"
+                type="email"
                 name="email"
                 id="email"
                 onChange={handleInputChange}
@@ -255,9 +264,9 @@ const CreatePoint = () => {
             <h2>Ítens de coleta</h2>
           </legend>
 
-          <ul className="items-grid">
+          <ul className={`items-grid ${!items.length ? 'one' : ''}`}>
             {
-              items.map(item => (
+              items.length ? items.map(item => (
                 <li
                   className={selectedItems.includes(item.id) ? 'selected' : ''}
                   onClick={() => handleSelectItem(item.id)}
@@ -266,7 +275,8 @@ const CreatePoint = () => {
                   <img src={item.image_url} alt={item.title} />
                   <span>{item.title}</span>
                 </li>
-              ))
+              )) :
+                <li className="without-items">Nenhum item foi encontrado!</li>
             }
           </ul>
         </fieldset>
